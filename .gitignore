@@ -3,3 +3,6 @@ poetry.lock
 
 # Environment
 .env
+
+# remove these when you are finished 
+old_quickstart.ipynb
