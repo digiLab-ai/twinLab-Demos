@@ -11,7 +11,7 @@ jupyter = "^1.0.0"
 matplotlib = "^3.7.1"
 numpy = "^1.24.2"
 pandas = "<2.0.0"
-twinlab = "^2.2.0"
+twinlab = {path = "../twinlab/client/python", develop = true}
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
