@@ -1,0 +1,133 @@
+from unittest.mock import patch
+import pytest
+import twinlab as tl
+import pandas as pd
+
+import csv
+import json
+
+## 1. Load Dataset (From twinlab.helper)
+
+
+@pytest.fixture
+def mock_response_csv_file():
+    # Create a DataFrame directly
+    df = pd.DataFrame([["Joe", 2], ["Joseph", 1]], columns=["Name", "Credits"])
+    return df
+
+
+@pytest.fixture
+def mock_response_csv_file_path(tmp_path):
+    # Create a temporary CSV file
+    csv_data = [["Name", "Credits"], ["Joe", "2"], ["Joseph", "1"]]
+    csv_file_path = tmp_path / "test.csv"
+    # Write the csv_data to the csv_file_path
+    with open(csv_file_path, "w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerows(csv_data)
+    # Return the path to the temporary CSV file
+    return csv_file_path
+
+
+@patch("twinlab.helper.load_dataset")
+def test_load_dataset(
+    mock_load_dataset_function,
+    mock_response_csv_file,
+    mock_response_csv_file_path,
+    dataframe_regression,
+):
+    # Mock request and response
+    mock_load_dataset_function.return_value = mock_response_csv_file
+
+    # Load dataset
+    df = tl.load_dataset(filepath=str(mock_response_csv_file_path))
+
+    # Check the results
+    dataframe_regression.check(df, basename="load_dataset_data")
+
+
+## 2. Load Params (From twinlab.helper)
+
+
+@pytest.fixture
+def mock_response_params_file():
+    return {"param1": "value1", "param2": "value2"}
+
+
+@pytest.fixture
+def mock_response_params_file_path(tmp_path):
+    # Create a temporary JSON file
+    json_file_path = tmp_path / "test.json"
+    # Write the json_data to the json_file_path
+    with open(json_file_path, "w") as file:
+        json.dump({"param1": "value1", "param2": "value2"}, file)
+    # Return the path to the temporary JSON file
+    return json_file_path
+
+
+@patch("twinlab.helper.load_params")
+def test_load_params(
+    mock_load_params_function,
+    mock_response_params_file,
+    mock_response_params_file_path,
+    data_regression,
+):
+    # Mock request and response
+    mock_load_params_function.return_value = mock_response_params_file
+
+    # Load params
+    params = tl.load_params(filepath=str(mock_response_params_file_path))
+
+    # Check the results
+    data_regression.check(params, basename="load_params_data")
+
+
+## 3. Get Sample (From twinlab.helper)
+
+
+def test_get_sample(dataframe_regression):
+
+    # Mock sample data
+    data = {
+        ("y", "0"): [-2.749357, 0.959321, 0.566999, -0.154889],
+        ("y", "1"): [-0.462247, -0.230350, 2.881398, 2.786605],
+        ("x", "0"): [0.959321, 0.566999, -0.154889, -0.462247],
+        ("x", "1"): [-0.230350, 2.881398, 2.786605, -2.749357],
+    }
+
+    df = pd.DataFrame(data)
+
+    result = tl.get_sample(df, key=0)
+
+    # Check the result
+    dataframe_regression.check(result, basename="get_sample_data")
+
+
+## 4. Join sample (From twinlab.helper)
+
+
+def test_join_samples(dataframe_regression):
+
+    # Mock two sample dataframes
+    data1 = {
+        ("y", "0"): [-2.749357, 0.959321, 0.566999, -0.154889],
+        ("y", "1"): [-0.462247, -0.230350, 2.881398, 2.786605],
+        ("x", "0"): [0.959321, 0.566999, -0.154889, -0.462247],
+        ("x", "1"): [-0.230350, 2.881398, 2.786605, -2.749357],
+    }
+
+    df1 = pd.DataFrame(data1)
+
+    data2 = {
+        ("y", "0"): [1.0, 2.0, 3.0, 4.0],
+        ("y", "1"): [5.0, 6.0, 7.0, 8.0],
+        ("x", "0"): [9.0, 10.0, 11.0, 12.0],
+        ("x", "1"): [13.0, 14.0, 15.0, 16.0],
+    }
+
+    df2 = pd.DataFrame(data2)
+
+    result = tl.join_samples(df1, df2)
+
+    # Check the result
+    dataframe_regression.check(result, basename="join_samples_data")

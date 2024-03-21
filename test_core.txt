@@ -1,0 +1,178 @@
+from unittest.mock import patch
+import pytest
+import twinlab as tl
+import pandas as pd
+
+
+## 1. Get server URL (From twinlab.client)
+
+
+@pytest.fixture
+def mock_response_get_server_url():
+    return 200, {"url": "https://twinlab.digilab.co.uk/test"}
+
+
+@patch("twinlab.client.get_server_url")
+def test_get_server_url(mock_get_server_url_function, mock_response_get_server_url):
+    # Mock request and response
+    mock_get_server_url_function.return_value = mock_response_get_server_url
+
+
+## 2. Get API key (From twinlab.client)
+
+
+@pytest.fixture
+def mock_response_get_api_key():
+    return 200, {"api_key": "ABCDEF123456"}
+
+
+@patch("twinlab.client.get_api_key")
+def test_get_api_key(mock_get_api_key_function, mock_response_get_api_key):
+    # Mock request and response
+    mock_get_api_key_function.return_value = mock_response_get_api_key
+
+
+## 3. Get user information (From twinlab.api)
+
+
+@pytest.fixture
+def mock_response_user_information():
+    return 200, {"credits": 0, "username": "your_username"}
+
+
+@patch("twinlab.api.get_user")
+def test_user_information(mock_api_get_user_function, mock_response_user_information):
+    # Mock request and response
+    mock_api_get_user_function.return_value = mock_response_user_information
+
+
+## 4. Get versions (From twinlab.api)
+
+
+@pytest.fixture
+def mock_response_get_versions():
+    return 200, {
+        "cloud": "2.1.0",
+        "image": "twinlab-dev",
+        "library": "1.6.0",
+        "modal": "0.2.0",
+    }
+
+
+@patch("twinlab.api.get_versions")
+def test_get_versions(mock_api_get_versions_function, mock_response_get_versions):
+    # Mock request and response
+    mock_api_get_versions_function.return_value = mock_response_get_versions
+
+
+## 5. List datasets (From twinlab.api)
+
+
+@pytest.fixture
+def mock_api_response_list_datasets():
+    return 200, {"datasets": ["dataset1", "dataset2", "dataset3"]}
+
+
+@pytest.fixture
+def mock_response_list_datasets():
+    return {"datasets": ["dataset1", "dataset2", "dataset3"]}
+
+
+@patch("twinlab.api.list_datasets")
+def test_list_datasets(
+    mock_api_list_datasets_function,
+    mock_api_response_list_datasets,
+    mock_response_list_datasets,
+    data_regression,
+):
+    # Mock request and response
+    mock_api_list_datasets_function.return_value = mock_api_response_list_datasets
+    # Check result
+    data_regression.check(mock_response_list_datasets, basename="list_datasets")
+
+
+## 6. List emulators (From twinlab.api)
+
+
+@pytest.fixture
+def mock_api_response_list_emulators():
+    return 200, {"models": ["emulator1", "emulator2", "emulator3"]}
+
+
+@pytest.fixture
+def mock_response_list_emulators():
+    return {"models": ["emulator1", "emulator2", "emulator3"]}
+
+
+@patch("twinlab.api.list_models")
+def test_list_emulators(
+    mock_api_list_emulators_function,
+    mock_api_response_list_emulators,
+    mock_response_list_emulators,
+    data_regression,
+):
+    # Mock request and response
+    mock_api_list_emulators_function.return_value = mock_api_response_list_emulators
+    # Check result
+    data_regression.check(mock_response_list_emulators, basename="list_emulators")
+
+
+## 7. List example datasets (From twinlab.api)
+
+
+@pytest.fixture
+def mock_api_response_list_example_datasets():
+    return 200, {"datasets": ["example1", "example2, example3"]}
+
+
+@pytest.fixture
+def mock_response_list_example_datasets():
+    return {"datasets": ["example1", "example2, example3"]}
+
+
+@patch("twinlab.api.list_example_datasets")
+def test_list_example_datasets(
+    mock_api_list_example_datasets_function,
+    mock_api_response_list_example_datasets,
+    mock_response_list_example_datasets,
+    data_regression,
+):
+    # Mock request and response
+    mock_api_list_example_datasets_function.return_value = (
+        mock_api_response_list_example_datasets
+    )
+    # Check result
+    data_regression.check(mock_response_list_example_datasets, basename="list_examples")
+
+
+## 8. Load example dataset (From twinlab.api)
+
+
+@pytest.fixture
+def mock_api_response_load_example_dataset():
+    return 200, {
+        "dataset": "Pack price [GBP],Number of biscuits per pack,Number of packs sold,Profit [GBP]\n2.3,20,2385,16695.0\n2.25,20,2553,16594.5\n2.0,18,2812,15747.2\n1.8,16,2647,13764.4\n1.9,16,2755,17081.0\n1.95,16,2642,17701.4\n2.2,18,2516,19121.6\n2.0,20,2886,11544.0\n2.05,20,2964,13338.0\n2.1,20,2839,14195.0\n1.8,20,3438,6876.0\n1.9,18,2887,13280.2\n"
+    }
+
+
+@pytest.fixture
+def mock_response_load_example_dataset():
+    df = tl.load_example_dataset("biscuits")
+    return df
+
+
+@patch("twinlab.api.load_example_dataset")
+def test_load_example_dataset(
+    mock_api_load_example_dataset_function,
+    mock_api_response_load_example_dataset,
+    mock_response_load_example_dataset,
+    dataframe_regression,
+):
+    # Mock request and response
+    mock_api_load_example_dataset_function.return_value = (
+        mock_api_response_load_example_dataset
+    )
+    # Test function
+    dataframe_regression.check(
+        mock_response_load_example_dataset, basename="load_example_dataset_biscuits"
+    )
